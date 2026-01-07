@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>搜索 API 字段映射</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --bg: #f5efe5;
+      --ink: #1b1a17;
+      --muted: #4c4a45;
+      --panel: #fffaf2;
+      --accent: #0f766e;
+      --accent-2: #f59e0b;
+      --accent-3: #0ea5a4;
+      --line: rgba(15, 118, 110, 0.35);
+      --line-approx: rgba(245, 158, 11, 0.6);
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+      --border: rgba(27, 26, 23, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Helvetica Neue", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at -10% -20%, rgba(14, 165, 164, 0.18), transparent 60%),
+        radial-gradient(900px 600px at 110% 10%, rgba(245, 158, 11, 0.14), transparent 60%),
+        linear-gradient(180deg, #f9f2e7 0%, #f5efe5 55%, #f1ebe1 100%);
+      min-height: 100vh;
+      padding: 40px 28px 60px;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      font-family: "DM Serif Display", serif;
+      font-size: clamp(28px, 3vw, 40px);
+      margin: 0 0 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .title-block p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 560px;
+    }
+
+    .vendor-switch {
+      display: flex;
+      gap: 10px;
+      background: rgba(27, 26, 23, 0.06);
+      border-radius: 999px;
+      padding: 6px;
+    }
+
+    .vendor-switch button {
+      border: 0;
+      background: transparent;
+      font-family: "Space Grotesk", sans-serif;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .vendor-switch button.active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend i {
+      width: 22px;
+      height: 2px;
+      background: var(--line);
+      display: inline-block;
+      border-radius: 999px;
+    }
+
+    .legend i.approx {
+      background: var(--line-approx);
+      border: 1px dashed rgba(245, 158, 11, 0.9);
+      height: 0;
+    }
+
+    .layout {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      min-height: 520px;
+      height: min(72vh, 760px);
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -140px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14, 165, 164, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+
+    .meta-card {
+      background: rgba(15, 118, 110, 0.08);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .meta-card code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    .group {
+      margin-bottom: 16px;
+    }
+
+    .group h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      color: rgba(27, 26, 23, 0.55);
+    }
+
+    .field-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(27, 26, 23, 0.12);
+      background: #fffefb;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: relative;
+      animation: riseIn 0.4s ease forwards;
+      opacity: 0;
+      transform: translateY(6px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .field strong {
+      font-size: 14px;
+    }
+
+    .field small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .field code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .field:hover {
+      transform: translateY(0) scale(1.01);
+      border-color: rgba(15, 118, 110, 0.5);
+    }
+
+    .field.missing {
+      background: rgba(27, 26, 23, 0.04);
+      border-style: dashed;
+      color: rgba(27, 26, 23, 0.5);
+    }
+
+    .field.missing code {
+      color: rgba(27, 26, 23, 0.4);
+    }
+
+    .field.highlight {
+      border-color: rgba(14, 165, 164, 0.8);
+      box-shadow: 0 8px 24px rgba(14, 165, 164, 0.18);
+    }
+
+    .mapping-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .mapping-layer path {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 2.2;
+    }
+
+    .mapping-layer path.approx {
+      stroke: var(--line-approx);
+      stroke-dasharray: 6 6;
+    }
+
+    .mapping-layer path.active {
+      stroke-width: 3.4;
+      filter: drop-shadow(0 0 8px rgba(15, 118, 110, 0.5));
+    }
+
+    .mapping-layer path.approx.active {
+      filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.45));
+    }
+
+    .mapping-layer path.dimmed {
+      opacity: 0;
+    }
+
+    .mapping-list {
+      display: none;
+      margin-top: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .mapping-list div {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(27, 26, 23, 0.12);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mapping-list div:last-child {
+      border-bottom: none;
+    }
+
+    .pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .pill.approx {
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+    }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+
+      .mapping-layer {
+        display: none;
+      }
+
+      .panel {
+        height: auto;
+        overflow: visible;
+      }
+
+      .mapping-list {
+        display: block;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 26px 18px 40px;
+      }
+
+      .vendor-switch {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .vendor-switch button {
+        flex: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <div class="title-block">
+        <h1>搜索 API 字段映射</h1>
+        <p>左侧是统一标准（参考 Tavily），右侧为指定供应商的参数列表。切换供应商后自动更新映射关系。</p>
+      </div>
+      <div class="vendor-switch" role="tablist">
+        <button class="active" data-vendor="tavily" role="tab">Tavily</button>
+        <button data-vendor="brave" role="tab">Brave</button>
+        <button data-vendor="jina" role="tab">Jina</button>
+      </div>
+    </header>
+
+    <div class="legend">
+      <span><i></i> 直接映射</span>
+      <span><i class="approx"></i> 近似映射</span>
+    </div>
+
+    <div class="layout" id="mapping-container">
+      <section class="panel" id="unified-panel">
+        <h2>统一标准</h2>
+        <div id="unified-fields"></div>
+      </section>
+
+      <section class="panel" id="vendor-panel">
+        <h2>供应商标准</h2>
+        <div class="meta-card" id="vendor-meta"></div>
+        <div id="vendor-fields"></div>
+        <div class="mapping-list" id="mapping-list"></div>
+      </section>
+
+      <svg class="mapping-layer" id="mapping-layer"></svg>
+    </div>
+  </div>
+
+  <script>
+    const unifiedFields = [
+      { key: "query", label: "query", desc: "搜索查询", group: "核心" },
+      { key: "search_depth", label: "search_depth", desc: "检索深度", group: "核心" },
+      { key: "max_results", label: "max_results", desc: "最大结果数", group: "核心" },
+      { key: "offset", label: "offset", desc: "分页偏移", group: "核心" },
+      { key: "topic", label: "topic", desc: "搜索主题", group: "策略" },
+      { key: "time_range", label: "time_range", desc: "时间范围", group: "策略" },
+      { key: "start_date", label: "start_date", desc: "起始日期", group: "策略" },
+      { key: "end_date", label: "end_date", desc: "结束日期", group: "策略" },
+      { key: "country", label: "country", desc: "国家", group: "区域与语言" },
+      { key: "language", label: "language", desc: "内容语言", group: "区域与语言" },
+      { key: "ui_language", label: "ui_language", desc: "界面语言", group: "区域与语言" },
+      { key: "location", label: "location", desc: "位置", group: "区域与语言" },
+      { key: "result_types", label: "result_types", desc: "结果类型", group: "过滤" },
+      { key: "safe_search", label: "safe_search", desc: "安全过滤", group: "过滤" },
+      { key: "include_answer", label: "include_answer", desc: "附带答案", group: "内容" },
+      { key: "include_content", label: "include_content", desc: "正文内容", group: "内容" },
+      { key: "content_format", label: "content_format", desc: "内容格式", group: "内容" },
+      { key: "include_images", label: "include_images", desc: "图片结果", group: "内容" },
+      { key: "include_image_descriptions", label: "include_image_descriptions", desc: "图片描述", group: "内容" },
+      { key: "include_favicon", label: "include_favicon", desc: "favicon", group: "内容" },
+      { key: "include_domains", label: "include_domains", desc: "域名白名单", group: "过滤" },
+      { key: "exclude_domains", label: "exclude_domains", desc: "域名黑名单", group: "过滤" },
+      { key: "site", label: "site", desc: "站内搜索", group: "过滤" },
+      { key: "use_cache", label: "use_cache", desc: "缓存策略", group: "策略" },
+      { key: "include_usage", label: "include_usage", desc: "用量信息", group: "策略" }
+    ];
+
+    const vendors = {
+      tavily: {
+        label: "Tavily Search",
+        meta: {
+          method: "POST",
+          endpoint: "https://api.tavily.com/search",
+          auth: "Authorization: Bearer <API_KEY>",
+          format: "JSON Body"
+        },
+        fields: [
+          { key: "query", label: "query", desc: "搜索查询", group: "Body" },
+          { key: "search_depth", label: "search_depth", desc: "advanced/basic/fast", group: "Body" },
+          { key: "max_results", label: "max_results", desc: "结果数上限", group: "Body" },
+          { key: "topic", label: "topic", desc: "general/news/finance", group: "Body" },
+          { key: "time_range", label: "time_range", desc: "day/week/month/year", group: "Body" },
+          { key: "start_date", label: "start_date", desc: "YYYY-MM-DD", group: "Body" },
+          { key: "end_date", label: "end_date", desc: "YYYY-MM-DD", group: "Body" },
+          { key: "country", label: "country", desc: "topic=general", group: "Body" },
+          { key: "include_answer", label: "include_answer", desc: "basic/advanced", group: "Body" },
+          { key: "include_raw_content", label: "include_raw_content", desc: "markdown/text", group: "Body" },
+          { key: "include_images", label: "include_images", desc: "返回图片", group: "Body" },
+          { key: "include_image_descriptions", label: "include_image_descriptions", desc: "图片描述", group: "Body" },
+          { key: "include_favicon", label: "include_favicon", desc: "favicon", group: "Body" },
+          { key: "include_domains", label: "include_domains", desc: "白名单", group: "Body" },
+          { key: "exclude_domains", label: "exclude_domains", desc: "黑名单", group: "Body" },
+          { key: "include_usage", label: "include_usage", desc: "用量", group: "Body" }
+        ],
+        mapping: [
+          { from: "query", to: "query", kind: "direct" },
+          { from: "search_depth", to: "search_depth", kind: "direct" },
+          { from: "max_results", to: "max_results", kind: "direct" },
+          { from: "topic", to: "topic", kind: "direct" },
+          { from: "time_range", to: "time_range", kind: "direct" },
+          { from: "start_date", to: "start_date", kind: "direct" },
+          { from: "end_date", to: "end_date", kind: "direct" },
+          { from: "country", to: "country", kind: "direct" },
+          { from: "include_answer", to: "include_answer", kind: "direct" },
+          { from: "include_content", to: "include_raw_content", kind: "direct" },
+          { from: "content_format", to: "include_raw_content", kind: "direct" },
+          { from: "include_images", to: "include_images", kind: "direct" },
+          { from: "include_image_descriptions", to: "include_image_descriptions", kind: "direct" },
+          { from: "include_favicon", to: "include_favicon", kind: "direct" },
+          { from: "include_domains", to: "include_domains", kind: "direct" },
+          { from: "exclude_domains", to: "exclude_domains", kind: "direct" },
+          { from: "include_usage", to: "include_usage", kind: "direct" }
+        ]
+      },
+      brave: {
+        label: "Brave Web Search",
+        meta: {
+          method: "GET",
+          endpoint: "https://api.search.brave.com/res/v1/web/search",
+          auth: "X-Subscription-Token: <API_KEY>",
+          format: "Query Params"
+        },
+        fields: [
+          { key: "q", label: "q", desc: "搜索查询", group: "Query" },
+          { key: "count", label: "count", desc: "结果数上限", group: "Query" },
+          { key: "offset", label: "offset", desc: "分页偏移", group: "Query" },
+          { key: "country", label: "country", desc: "国家码", group: "Query" },
+          { key: "search_lang", label: "search_lang", desc: "语言", group: "Query" },
+          { key: "ui_lang", label: "ui_lang", desc: "UI 语言", group: "Query" },
+          { key: "freshness", label: "freshness", desc: "时间范围", group: "Query" },
+          { key: "result_filter", label: "result_filter", desc: "web/news/...", group: "Query" },
+          { key: "safesearch", label: "safesearch", desc: "安全过滤", group: "Query" },
+          { key: "x_loc", label: "X-Loc-*", desc: "位置相关 Header", group: "Headers" },
+          { key: "cache_control", label: "Cache-Control", desc: "no-cache", group: "Headers" }
+        ],
+        mapping: [
+          { from: "query", to: "q", kind: "direct" },
+          { from: "max_results", to: "count", kind: "direct" },
+          { from: "offset", to: "offset", kind: "direct" },
+          { from: "country", to: "country", kind: "direct" },
+          { from: "language", to: "search_lang", kind: "direct" },
+          { from: "ui_language", to: "ui_lang", kind: "direct" },
+          { from: "time_range", to: "freshness", kind: "direct" },
+          { from: "start_date", to: "freshness", kind: "direct" },
+          { from: "end_date", to: "freshness", kind: "direct" },
+          { from: "result_types", to: "result_filter", kind: "direct" },
+          { from: "safe_search", to: "safesearch", kind: "direct" },
+          { from: "location", to: "x_loc", kind: "direct" },
+          { from: "topic", to: "result_filter", kind: "approx" },
+          { from: "site", to: "q", kind: "approx" },
+          { from: "use_cache", to: "cache_control", kind: "direct" }
+        ]
+      },
+      jina: {
+        label: "Jina Search",
+        meta: {
+          method: "POST",
+          endpoint: "https://s.jina.ai/",
+          auth: "Authorization: Bearer $JINA_API_KEY",
+          format: "JSON Body + Headers"
+        },
+        fields: [
+          { key: "q", label: "q", desc: "搜索查询", group: "Body" },
+          { key: "num", label: "num", desc: "结果数上限", group: "Body" },
+          { key: "page", label: "page", desc: "分页偏移", group: "Body" },
+          { key: "gl", label: "gl", desc: "国家码", group: "Body" },
+          { key: "hl", label: "hl", desc: "语言", group: "Body" },
+          { key: "location", label: "location", desc: "位置", group: "Body" },
+          { key: "x_locale", label: "X-Locale", desc: "UI 语言", group: "Headers" },
+          { key: "x_site", label: "X-Site", desc: "站内搜索", group: "Headers" },
+          { key: "x_no_cache", label: "X-No-Cache", desc: "绕过缓存", group: "Headers" },
+          { key: "x_return_format", label: "X-Return-Format", desc: "格式", group: "Headers" },
+          { key: "x_images", label: "X-With-Images-Summary", desc: "图片汇总", group: "Headers" },
+          { key: "x_alt", label: "X-With-Generated-Alt", desc: "图片描述", group: "Headers" },
+          { key: "x_favicon", label: "X-With-Favicon", desc: "favicon", group: "Headers" },
+          { key: "x_respond_with", label: "X-Respond-With", desc: "no-content", group: "Headers" }
+        ],
+        mapping: [
+          { from: "query", to: "q", kind: "direct" },
+          { from: "max_results", to: "num", kind: "direct" },
+          { from: "offset", to: "page", kind: "direct" },
+          { from: "country", to: "gl", kind: "direct" },
+          { from: "language", to: "hl", kind: "direct" },
+          { from: "ui_language", to: "x_locale", kind: "direct" },
+          { from: "location", to: "location", kind: "direct" },
+          { from: "include_content", to: "x_respond_with", kind: "direct" },
+          { from: "content_format", to: "x_return_format", kind: "direct" },
+          { from: "include_images", to: "x_images", kind: "direct" },
+          { from: "include_image_descriptions", to: "x_alt", kind: "direct" },
+          { from: "include_favicon", to: "x_favicon", kind: "direct" },
+          { from: "site", to: "x_site", kind: "direct" },
+          { from: "use_cache", to: "x_no_cache", kind: "direct" }
+        ]
+      }
+    };
+
+    const unifiedContainer = document.getElementById("unified-fields");
+    const vendorContainer = document.getElementById("vendor-fields");
+    const vendorMeta = document.getElementById("vendor-meta");
+    const mappingLayer = document.getElementById("mapping-layer");
+    const mappingList = document.getElementById("mapping-list");
+    const mappingContainer = document.getElementById("mapping-container");
+
+    function buildForwardMap(vendor) {
+      return vendor.mapping.reduce((acc, pair) => {
+        if (!acc[pair.from]) {
+          acc[pair.from] = [];
+        }
+        acc[pair.from].push(pair.to);
+        return acc;
+      }, {});
+    }
+
+    function groupFields(fields) {
+      return fields.reduce((acc, field) => {
+        if (!acc[field.group]) {
+          acc[field.group] = [];
+        }
+        acc[field.group].push(field);
+        return acc;
+      }, {});
+    }
+
+    function renderGroupedFields(targetEl, grouped, keyAttr) {
+      targetEl.innerHTML = "";
+      Object.entries(grouped).forEach(([groupName, items]) => {
+        const groupEl = document.createElement("div");
+        groupEl.className = "group";
+        const title = document.createElement("h3");
+        title.textContent = groupName;
+        const list = document.createElement("div");
+        list.className = "field-list";
+        items.forEach((field, index) => {
+          const fieldEl = document.createElement("div");
+          fieldEl.className = "field";
+          fieldEl.dataset[keyAttr] = field.key;
+          fieldEl.style.animationDelay = `${index * 40}ms`;
+          fieldEl.innerHTML = `
+            <strong>${field.label}</strong>
+            <small>${field.desc}</small>
+          `;
+          list.appendChild(fieldEl);
+        });
+        groupEl.appendChild(title);
+        groupEl.appendChild(list);
+        targetEl.appendChild(groupEl);
+      });
+    }
+
+    function renderUnified() {
+      const grouped = groupFields(unifiedFields);
+      renderGroupedFields(unifiedContainer, grouped, "unifiedKey");
+    }
+
+    function renderVendor(vendorKey) {
+      const vendor = vendors[vendorKey];
+      const grouped = groupFields(vendor.fields);
+      renderGroupedFields(vendorContainer, grouped, "vendorKey");
+
+      vendorMeta.innerHTML = `
+        <div><strong>${vendor.label}</strong></div>
+        <div>Method: <code>${vendor.meta.method}</code></div>
+        <div>Endpoint: <code>${vendor.meta.endpoint}</code></div>
+        <div>Auth: <code>${vendor.meta.auth}</code></div>
+        <div>Format: <code>${vendor.meta.format}</code></div>
+      `;
+
+      updateMissingFields(vendor);
+      updateMappingList(vendor);
+      scheduleDraw();
+    }
+
+    function updateMissingFields(vendor) {
+      const mappedKeys = new Set(vendor.mapping.map(item => item.from));
+      document.querySelectorAll("[data-unified-key]").forEach(el => {
+        if (!mappedKeys.has(el.dataset.unifiedKey)) {
+          el.classList.add("missing");
+        } else {
+          el.classList.remove("missing");
+        }
+      });
+    }
+
+    function updateMappingList(vendor) {
+      mappingList.innerHTML = "";
+      vendor.mapping.forEach(pair => {
+        const left = unifiedFields.find(item => item.key === pair.from);
+        const right = vendor.fields.find(item => item.key === pair.to);
+        if (!left || !right) {
+          return;
+        }
+        const row = document.createElement("div");
+        const pill = document.createElement("span");
+        pill.className = `pill ${pair.kind === "approx" ? "approx" : ""}`;
+        pill.textContent = pair.kind === "approx" ? "近似" : "直接";
+        row.innerHTML = `
+          <span>${left.label} → ${right.label}</span>
+        `;
+        row.appendChild(pill);
+        mappingList.appendChild(row);
+      });
+    }
+
+    function drawLines(vendor) {
+      mappingLayer.innerHTML = "";
+      const rect = mappingContainer.getBoundingClientRect();
+      mappingLayer.setAttribute("width", rect.width);
+      mappingLayer.setAttribute("height", rect.height);
+
+      vendor.mapping.forEach(pair => {
+        const leftEl = document.querySelector(`[data-unified-key="${pair.from}"]`);
+        const rightEl = document.querySelector(`[data-vendor-key="${pair.to}"]`);
+        if (!leftEl || !rightEl) {
+          return;
+        }
+        const leftRect = leftEl.getBoundingClientRect();
+        const rightRect = rightEl.getBoundingClientRect();
+        const x1 = leftRect.right - rect.left;
+        const y1 = leftRect.top + leftRect.height / 2 - rect.top;
+        const x2 = rightRect.left - rect.left;
+        const y2 = rightRect.top + rightRect.height / 2 - rect.top;
+        const dx = Math.max(80, (x2 - x1) * 0.5);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
+        path.dataset.from = pair.from;
+        path.dataset.to = pair.to;
+        if (pair.kind === "approx") {
+          path.classList.add("approx");
+        }
+        mappingLayer.appendChild(path);
+      });
+
+      if (currentFocus) {
+        applyFocus(currentFocus, { force: true, skipScroll: true });
+      }
+    }
+
+    function buildReverseMap(vendor) {
+      return vendor.mapping.reduce((acc, pair) => {
+        if (!acc[pair.to]) {
+          acc[pair.to] = [];
+        }
+        acc[pair.to].push(pair.from);
+        return acc;
+      }, {});
+    }
+
+    let currentVendorKey = "tavily";
+    let currentVendor = vendors[currentVendorKey];
+    let currentReverseMap = buildReverseMap(currentVendor);
+    let currentForwardMap = buildForwardMap(currentVendor);
+    let currentFocus = null;
+    let currentFocusSignature = "";
+    let drawScheduled = false;
+
+    function scheduleDraw() {
+      if (drawScheduled) {
+        return;
+      }
+      drawScheduled = true;
+      requestAnimationFrame(() => {
+        drawScheduled = false;
+        drawLines(currentVendor);
+      });
+    }
+
+    function focusSignature(focus) {
+      const unified = [...focus.unifiedKeys].sort().join(",");
+      const vendor = [...focus.vendorKeys].sort().join(",");
+      const source = focus.source || "any";
+      return `u:${unified}|v:${vendor}|s:${source}`;
+    }
+
+    function scrollToField(panel, field) {
+      if (!panel || !field) {
+        return;
+      }
+      field.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+
+    function applyFocus(focus, options = {}) {
+      const signature = focusSignature(focus);
+      if (!options.force && signature === currentFocusSignature) {
+        return;
+      }
+      currentFocusSignature = signature;
+      currentFocus = focus;
+      const unifiedSet = new Set(focus.unifiedKeys);
+      const vendorSet = new Set(focus.vendorKeys);
+
+      document.querySelectorAll("[data-unified-key]").forEach(el => {
+        const keep = unifiedSet.has(el.dataset.unifiedKey);
+        el.classList.toggle("highlight", keep);
+      });
+
+      document.querySelectorAll("[data-vendor-key]").forEach(el => {
+        const keep = vendorSet.has(el.dataset.vendorKey);
+        el.classList.toggle("highlight", keep);
+      });
+
+      mappingLayer.querySelectorAll("path").forEach(path => {
+        const keep = unifiedSet.has(path.dataset.from) && vendorSet.has(path.dataset.to);
+        path.classList.toggle("active", keep);
+        path.classList.toggle("dimmed", !keep);
+      });
+
+      if (options.skipScroll) {
+        return;
+      }
+
+      const unifiedPanel = document.getElementById("unified-panel");
+      const vendorPanel = document.getElementById("vendor-panel");
+      const unifiedKey = focus.unifiedKeys[0];
+      const vendorKey = focus.vendorKeys[0];
+      const unifiedField = unifiedKey
+        ? document.querySelector(`[data-unified-key="${unifiedKey}"]`)
+        : null;
+      const vendorField = vendorKey
+        ? document.querySelector(`[data-vendor-key="${vendorKey}"]`)
+        : null;
+      if (focus.source === "unified" && vendorField) {
+        scrollToField(vendorPanel, vendorField);
+      } else if (focus.source === "vendor" && unifiedField) {
+        scrollToField(unifiedPanel, unifiedField);
+      }
+    }
+
+    function clearFocus() {
+      currentFocus = null;
+      currentFocusSignature = "";
+      document.querySelectorAll(".field").forEach(el => {
+        el.classList.remove("highlight");
+      });
+      mappingLayer.querySelectorAll("path").forEach(path => {
+        path.classList.remove("active", "dimmed");
+      });
+    }
+
+    function setActiveVendor(vendorKey) {
+      currentVendorKey = vendorKey;
+      currentVendor = vendors[vendorKey];
+      currentReverseMap = buildReverseMap(currentVendor);
+      currentForwardMap = buildForwardMap(currentVendor);
+      clearFocus();
+      document.querySelectorAll(".vendor-switch button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.vendor === vendorKey);
+      });
+      renderVendor(vendorKey);
+    }
+
+    renderUnified();
+    setActiveVendor("tavily");
+
+    document.querySelectorAll(".vendor-switch button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        setActiveVendor(btn.dataset.vendor);
+      });
+    });
+
+    mappingContainer.addEventListener("mouseover", event => {
+      const field = event.target.closest(".field");
+      if (!field) {
+        return;
+      }
+      const unifiedKey = field.dataset.unifiedKey;
+      const vendorKey = field.dataset.vendorKey;
+      if (unifiedKey) {
+        const vendorKeys = currentForwardMap[unifiedKey] || [];
+        applyFocus({ unifiedKeys: [unifiedKey], vendorKeys, source: "unified" });
+        return;
+      }
+      if (vendorKey) {
+        const unifiedKeys = currentReverseMap[vendorKey] || [];
+        applyFocus({ unifiedKeys, vendorKeys: [vendorKey], source: "vendor" });
+      }
+    });
+
+    mappingContainer.addEventListener("mouseout", event => {
+      const field = event.target.closest(".field");
+      if (!field) {
+        return;
+      }
+      if (event.relatedTarget && event.relatedTarget.closest(".field")) {
+        return;
+      }
+      clearFocus();
+    });
+
+    window.addEventListener("resize", () => {
+      scheduleDraw();
+    });
+
+    window.addEventListener("scroll", () => {
+      scheduleDraw();
+    }, { passive: true });
+
+    document.querySelectorAll(".panel").forEach(panel => {
+      panel.addEventListener("scroll", () => {
+        scheduleDraw();
+      }, { passive: true });
+    });
+  </script>
+</body>
+</html>
