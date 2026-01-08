@@ -1,0 +1,44 @@
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: uni-search-hub
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../docs/ddl.sql:/docker-entrypoint-initdb.d/001-ddl.sql:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp=true --lower_case_table_names=1
+    env_file:
+      - .env
+    healthcheck:
+      start_period: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.2.2
+    container_name: redis
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --bind 0.0.0.0 --port 6379 --requirepass ${REDIS_PASSWORD} --appendonly yes
+    env_file:
+      - .env
+    healthcheck:
+      start_period: 5s
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
+  redis_data:

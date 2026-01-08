@@ -1,0 +1,10 @@
+server:
+  port: "8081"
+  mode: "debug" # debug, release, test
+
+database:
+  mysql:
+    dsn: ""
+  redis:
+    addr: "127.0.0.1:6380"
+    password: ""
