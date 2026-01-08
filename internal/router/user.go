@@ -15,5 +15,8 @@ func SetUserRouter(router *gin.Engine) {
 		userRouter.POST("/", handler.CreateUser)
 		userRouter.PUT("/", handler.UpdateUser)
 		userRouter.DELETE("/:id", handler.DeleteUser)
+		userRouter.PUT("/self", handler.UpdateSelf)
+		userRouter.DELETE("/self", handler.DeleteSelf)
+		userRouter.GET("/self", handler.GetSelf)
 	}
 }
