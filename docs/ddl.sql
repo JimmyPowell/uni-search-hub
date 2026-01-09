@@ -49,3 +49,10 @@ INSERT INTO `users` (`username`, `password`, `display_name`, `role`, `status`, `
 ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Administrator', 2, 1, 'admin@example.com', 1000, 0, 0),
 ('user1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'User One', 1, 1, 'user1@example.com', 100, 10, 5),
 ('user2', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'User Two', 1, 1, 'user2@example.com', 100, 0, 0);
+
+create table `uni-search-hub`.options
+(
+    `key` varchar(191) not null
+        primary key,
+    value longtext     null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Options table';

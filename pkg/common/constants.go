@@ -1,6 +1,8 @@
 package common
 
 import (
+	"sync"
+
 	"github.com/google/uuid"
 )
 
@@ -36,3 +38,6 @@ const (
 	UserStatusEnabled  = 1 // don't use 0, 0 is the default value!
 	UserStatusDisabled = 2 // also don't use 0
 )
+
+var OptionMap map[string]string
+var OptionMapRWMutex sync.RWMutex
