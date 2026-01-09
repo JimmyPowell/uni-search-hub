@@ -2,7 +2,7 @@ package model
 
 import (
 	"strconv"
-	"uni-search-hub/internal/constant"
+	"uni-search-hub/pkg/common"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,7 +71,7 @@ func GetPageQuery(c *gin.Context) *PageInfo {
 			}
 		}
 		if pageInfo.PageSize == 0 {
-			pageInfo.PageSize = constant.ItemsPerPage
+			pageInfo.PageSize = common.ItemsPerPage
 		}
 	}
 

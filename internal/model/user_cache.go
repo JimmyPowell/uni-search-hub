@@ -3,9 +3,9 @@ package model
 import (
 	"fmt"
 	"time"
-	"uni-search-hub/internal/constant"
 	"uni-search-hub/internal/dto"
 	"uni-search-hub/internal/server"
+	"uni-search-hub/pkg/common"
 	"uni-search-hub/pkg/database"
 	"uni-search-hub/pkg/utils"
 
@@ -26,12 +26,12 @@ type UserBase struct {
 }
 
 func (user *UserBase) WriteContext(c *gin.Context) {
-	server.SetContextKey(c, constant.ContextKeyUserGroup, user.Group)
-	server.SetContextKey(c, constant.ContextKeyUserQuota, user.Quota)
-	server.SetContextKey(c, constant.ContextKeyUserStatus, user.Status)
-	server.SetContextKey(c, constant.ContextKeyUserEmail, user.Email)
-	server.SetContextKey(c, constant.ContextKeyUserName, user.Username)
-	server.SetContextKey(c, constant.ContextKeyUserSetting, user.GetSetting())
+	server.SetContextKey(c, common.ContextKeyUserGroup, user.Group)
+	server.SetContextKey(c, common.ContextKeyUserQuota, user.Quota)
+	server.SetContextKey(c, common.ContextKeyUserStatus, user.Status)
+	server.SetContextKey(c, common.ContextKeyUserEmail, user.Email)
+	server.SetContextKey(c, common.ContextKeyUserName, user.Username)
+	server.SetContextKey(c, common.ContextKeyUserSetting, user.GetSetting())
 }
 
 func (user *UserBase) GetSetting() dto.UserSetting {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"uni-search-hub/internal/constant"
 	"uni-search-hub/internal/dto"
+	"uni-search-hub/pkg/common"
 	"uni-search-hub/pkg/crypto"
 	"uni-search-hub/pkg/database"
 	"uni-search-hub/pkg/utils"
@@ -90,7 +90,7 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 	}
 
 	// 管理员区域 - 根据角色决定
-	if userRole == constant.RoleAdminUser {
+	if userRole == common.RoleAdminUser {
 		// 管理员可以访问管理员区域，但不能访问系统设置
 		defaultConfig["admin"] = map[string]interface{}{
 			"enabled":    true,
@@ -100,7 +100,7 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 			"user":       true,
 			"setting":    false, // 管理员不能访问系统设置
 		}
-	} else if userRole == constant.RoleRootUser {
+	} else if userRole == common.RoleRootUser {
 		// 超级管理员可以访问所有功能
 		defaultConfig["admin"] = map[string]interface{}{
 			"enabled":    true,
@@ -185,7 +185,7 @@ func SearchUsers(keyword string, group string, startIdx int, num int) ([]*User, 
 		// 如果是数字，同时搜索ID和其他字段
 		likeCondition = "id = ? OR " + likeCondition
 		if group != "" {
-			query = query.Where("("+likeCondition+") AND "+constant.CommonGroupCol+" = ?",
+			query = query.Where("("+likeCondition+") AND "+common.CommonGroupCol+" = ?",
 				keywordInt, "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", group)
 		} else {
 			query = query.Where(likeCondition,
@@ -194,7 +194,7 @@ func SearchUsers(keyword string, group string, startIdx int, num int) ([]*User, 
 	} else {
 		// 非数字关键字，只搜索字符串字段
 		if group != "" {
-			query = query.Where("("+likeCondition+") AND "+constant.CommonGroupCol+" = ?",
+			query = query.Where("("+likeCondition+") AND "+common.CommonGroupCol+" = ?",
 				"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", group)
 		} else {
 			query = query.Where(likeCondition,
@@ -269,8 +269,8 @@ func inviteUser(inviterId int) (err error) {
 		return err
 	}
 	user.AffCount++
-	user.AffQuota += constant.QuotaForInviter
-	user.AffHistoryQuota += constant.QuotaForInviter
+	user.AffQuota += common.QuotaForInviter
+	user.AffHistoryQuota += common.QuotaForInviter
 	return database.DB.Save(user).Error
 }
 
@@ -282,7 +282,7 @@ func (user *User) Insert(inviterId int) error {
 			return err
 		}
 	}
-	user.Quota = constant.QuotaForNewUser
+	user.Quota = common.QuotaForNewUser
 	//user.SetAccessToken(common.GetUUID())
 	user.AffCode = utils.GetRandomString(4)
 
@@ -407,7 +407,7 @@ func (user *User) ValidateAndFill() (err error) {
 	// find buy username or email
 	database.DB.Where("username = ? OR email = ?", username, username).First(user)
 	okay := crypto.ValidatePasswordAndHash(password, user.Password)
-	if !okay || user.Status != constant.UserStatusEnabled {
+	if !okay || user.Status != common.UserStatusEnabled {
 		return errors.New("用户名或密码错误，或用户已被封禁")
 	}
 	return nil
@@ -510,7 +510,7 @@ func IsAdmin(userId int) bool {
 		utils.SysLog("no such user " + err.Error())
 		return false
 	}
-	return user.Role >= constant.RoleAdminUser
+	return user.Role >= common.RoleAdminUser
 }
 
 func ValidateAccessToken(token string) (user *User) {
@@ -583,7 +583,7 @@ func GetUserGroup(id int, fromDB bool) (group string, err error) {
 		// Don't return error - fall through to DB
 	}
 	fromDB = true
-	err = database.DB.Model(&User{}).Where("id = ?", id).Select(constant.CommonGroupCol).Find(&group).Error
+	err = database.DB.Model(&User{}).Where("id = ?", id).Select(common.CommonGroupCol).Find(&group).Error
 	if err != nil {
 		return "", err
 	}
@@ -632,7 +632,7 @@ func IncreaseUserQuota(id int, quota int, db bool) (err error) {
 			utils.SysLog("failed to increase user quota: " + err.Error())
 		}
 	})
-	if !db && constant.BatchUpdateEnabled {
+	if !db && common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUserQuota, id, quota)
 		return nil
 	}
@@ -657,7 +657,7 @@ func DecreaseUserQuota(id int, quota int) (err error) {
 			utils.SysLog("failed to decrease user quota: " + err.Error())
 		}
 	})
-	if constant.BatchUpdateEnabled {
+	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUserQuota, id, -quota)
 		return nil
 	}
@@ -673,12 +673,12 @@ func decreaseUserQuota(id int, quota int) (err error) {
 }
 
 func GetRootUser() (user *User) {
-	database.DB.Where("role = ?", constant.RoleRootUser).First(&user)
+	database.DB.Where("role = ?", common.RoleRootUser).First(&user)
 	return user
 }
 
 func UpdateUserUsedQuotaAndRequestCount(id int, quota int) {
-	if constant.BatchUpdateEnabled {
+	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUsedQuota, id, quota)
 		addNewRecord(BatchUpdateTypeRequestCount, id, 1)
 		return
@@ -766,7 +766,7 @@ func (user *User) FillUserByLinuxDOId() error {
 
 func RootUserExists() bool {
 	var user User
-	err := database.DB.Where("role = ?", constant.RoleRootUser).First(&user).Error
+	err := database.DB.Where("role = ?", common.RoleRootUser).First(&user).Error
 	if err != nil {
 		return false
 	}

@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 	"uni-search-hub/internal/config"
-	"uni-search-hub/internal/constant"
+	"uni-search-hub/pkg/common"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +22,7 @@ func GetGinEngine(config config.ServerConfig) *gin.Engine {
 	return r
 }
 
-func SetContextKey(c *gin.Context, key constant.ContextKey, value any) {
+func SetContextKey(c *gin.Context, key common.ContextKey, value any) {
 	c.Set(string(key), value)
 }
 
