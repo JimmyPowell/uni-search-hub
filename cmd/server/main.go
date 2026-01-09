@@ -13,6 +13,10 @@ func main() {
 	cfg := config.LoadConfig()
 
 	database.InitDB(cfg.Database.MySQL)
+	err := model.MigrateDB()
+	if err != nil {
+		return
+	}
 	database.InitRedis(cfg.Database.Redis)
 
 	r := server.GetGinEngine(cfg.Server)
@@ -24,7 +28,7 @@ func main() {
 	// 热更新配置
 	go model.SyncOptions(common.SyncFrequency)
 
-	err := r.Run(":" + cfg.Server.Port)
+	err = r.Run(":" + cfg.Server.Port)
 	if err != nil {
 		return
 	}
