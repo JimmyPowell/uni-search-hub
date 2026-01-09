@@ -27,6 +27,10 @@ var QuotaForInvitee = 0
 var BatchUpdateEnabled = false
 var BatchUpdateInterval int
 
+var TurnstileCheckEnabled = false
+var TurnstileSiteKey = ""
+var TurnstileSecretKey = ""
+
 const (
 	RoleGuestUser  = 0
 	RoleCommonUser = 1
