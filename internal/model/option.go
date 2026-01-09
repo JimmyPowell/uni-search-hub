@@ -32,6 +32,7 @@ func InitOptionMap() {
 	common.OptionMap["QuotaForNewUser"] = strconv.Itoa(common.QuotaForNewUser)
 	common.OptionMap["QuotaForInviter"] = strconv.Itoa(common.QuotaForInviter)
 	common.OptionMap["QuotaForInvitee"] = strconv.Itoa(common.QuotaForInvitee)
+	common.OptionMap["TurnstileCheckEnabled"] = strconv.FormatBool(common.TurnstileCheckEnabled)
 
 	// 自动添加所有注册的模型配置
 	modelConfigs := config.GlobalConfig.ExportAllConfigs()
@@ -87,6 +88,14 @@ func updateOptionMap(key string, value string) (err error) {
 		return nil // 已由配置系统处理
 	}
 
+	if strings.HasSuffix(key, "Enabled") {
+		boolValue := value == "true"
+		switch key {
+		case "TurnstileCheckEnabled":
+			common.TurnstileCheckEnabled = boolValue
+		}
+	}
+
 	switch key {
 	case "SystemName":
 		common.SystemName = value
@@ -96,6 +105,10 @@ func updateOptionMap(key string, value string) (err error) {
 		common.QuotaForInviter, _ = strconv.Atoi(value)
 	case "QuotaForInvitee":
 		common.QuotaForInvitee, _ = strconv.Atoi(value)
+	case "TurnstileSecretKey":
+		common.TurnstileSecretKey = value
+	case "TurnstileSiteKey":
+		common.TurnstileSiteKey = value
 	}
 
 	return nil
