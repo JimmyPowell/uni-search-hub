@@ -5,5 +5,5 @@ import (
 )
 
 func SetRouter(router *gin.Engine) {
-	SetUserRouter(router)
+	SetApiRouter(router)
 }

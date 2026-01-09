@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE: uni-search-hub
     volumes:
       - mysql_data:/var/lib/mysql
-      - ../docs/ddl.sql:/docker-entrypoint-initdb.d/001-ddl.sql:ro
+#      - ../docs/ddl.sql:/docker-entrypoint-initdb.d/001-ddl.sql:ro
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --explicit_defaults_for_timestamp=true --lower_case_table_names=1
     env_file:
       - .env
