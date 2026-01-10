@@ -51,3 +51,23 @@ func GenerateRandomKey(length int) (string, error) {
 func MessageWithRequestId(message string, id string) string {
 	return fmt.Sprintf("%s (request id: %s)", message, id)
 }
+
+func Interface2String(inter interface{}) string {
+	switch inter.(type) {
+	case string:
+		return inter.(string)
+	case int:
+		return fmt.Sprintf("%d", inter.(int))
+	case float64:
+		return fmt.Sprintf("%f", inter.(float64))
+	case bool:
+		if inter.(bool) {
+			return "true"
+		} else {
+			return "false"
+		}
+	case nil:
+		return ""
+	}
+	return fmt.Sprintf("%v", inter)
+}
