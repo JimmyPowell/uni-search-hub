@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"uni-search-hub/internal/setting"
 	"uni-search-hub/internal/setting/config"
 	"uni-search-hub/pkg/common"
 	"uni-search-hub/pkg/database"
@@ -33,6 +34,11 @@ func InitOptionMap() {
 	common.OptionMap["QuotaForInviter"] = strconv.Itoa(common.QuotaForInviter)
 	common.OptionMap["QuotaForInvitee"] = strconv.Itoa(common.QuotaForInvitee)
 	common.OptionMap["TurnstileCheckEnabled"] = strconv.FormatBool(common.TurnstileCheckEnabled)
+	common.OptionMap["RegisterEnabled"] = strconv.FormatBool(common.RegisterEnabled)
+	common.OptionMap["PasswordLoginEnabled"] = strconv.FormatBool(common.PasswordLoginEnabled)
+	common.OptionMap["PasswordRegisterEnabled"] = strconv.FormatBool(common.PasswordRegisterEnabled)
+	common.OptionMap["EmailVerificationEnabled"] = strconv.FormatBool(common.EmailVerificationEnabled)
+	common.OptionMap["DefaultUseAutoGroup"] = strconv.FormatBool(setting.DefaultUseAutoGroup)
 
 	// 自动添加所有注册的模型配置
 	modelConfigs := config.GlobalConfig.ExportAllConfigs()
@@ -93,6 +99,16 @@ func updateOptionMap(key string, value string) (err error) {
 		switch key {
 		case "TurnstileCheckEnabled":
 			common.TurnstileCheckEnabled = boolValue
+		case "RegisterEnabled":
+			common.RegisterEnabled = boolValue
+		case "PasswordLoginEnabled":
+			common.PasswordLoginEnabled = boolValue
+		case "PasswordRegisterEnabled":
+			common.PasswordRegisterEnabled = boolValue
+		case "EmailVerificationEnabled":
+			common.EmailVerificationEnabled = boolValue
+		case "DefaultUseAutoGroup":
+			setting.DefaultUseAutoGroup = boolValue
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"time"
@@ -35,7 +36,7 @@ func InitRedis(config config.RedisConfig) {
 		Password: config.Password,
 	})
 
-	if config.SyncFrequency == "" {
+	if os.Getenv("SYNC_FREQUENCY") == "" {
 		utils.SysLog("SYNC_FREQUENCY not set, use default value 60")
 		common.SyncFrequency = 60
 	}

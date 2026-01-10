@@ -2,6 +2,7 @@ package router
 
 import (
 	"uni-search-hub/internal/handler"
+	"uni-search-hub/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,14 +10,31 @@ import (
 func SetUserRouter(router *gin.RouterGroup) {
 	userRouter := router.Group("/user")
 	{
-		userRouter.GET("/", handler.GetAllUsers)
-		userRouter.GET("/search", handler.SearchUsers)
-		userRouter.GET("/:id", handler.GetUser)
-		userRouter.POST("/", handler.CreateUser)
-		userRouter.PUT("/", handler.UpdateUser)
-		userRouter.DELETE("/:id", handler.DeleteUser)
-		userRouter.PUT("/self", handler.UpdateSelf)
-		userRouter.DELETE("/self", handler.DeleteSelf)
-		userRouter.GET("/self", handler.GetSelf)
+		userRouter.GET("/root", handler.SetUpRootUser)
+
+		userRouter.POST("/register", middleware.TurnstileCheck(), handler.Register)
+		userRouter.POST("/login", middleware.TurnstileCheck(), handler.Login)
+		userRouter.GET("/logout", handler.Logout)
+
+		selfRouter := userRouter.Group("/")
+		selfRouter.Use(middleware.UserAuth())
+		{
+			selfRouter.GET("/self", handler.GetSelf)
+			selfRouter.PUT("/self", handler.UpdateSelf)
+			selfRouter.DELETE("/self", handler.DeleteSelf)
+			selfRouter.GET("/token", handler.GenerateAccessToken)
+		}
+
+		adminRouter := userRouter.Group("/")
+		adminRouter.Use(middleware.AdminAuth())
+		{
+			adminRouter.GET("/", handler.GetAllUsers)
+			adminRouter.GET("/search", handler.SearchUsers)
+			adminRouter.GET("/:id", handler.GetUser)
+			adminRouter.POST("/", handler.CreateUser)
+			adminRouter.PUT("/", handler.UpdateUser)
+			adminRouter.DELETE("/:id", handler.DeleteUser)
+		}
+
 	}
 }

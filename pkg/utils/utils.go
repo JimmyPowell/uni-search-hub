@@ -2,7 +2,9 @@ package utils
 
 import (
 	crand "crypto/rand"
+	"encoding/base64"
 	"math/big"
+	"math/rand"
 	"time"
 )
 
@@ -30,4 +32,17 @@ func GenerateRandomCharsKey(length int) (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func GetRandomInt(max int) int {
+	//rand.Seed(time.Now().UnixNano())
+	return rand.Intn(max)
+}
+
+func GenerateRandomKey(length int) (string, error) {
+	bytes := make([]byte, length*3/4) // 对于48位的输出，这里应该是36
+	if _, err := crand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(bytes), nil
 }
