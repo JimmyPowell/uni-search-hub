@@ -5,12 +5,25 @@ import (
 	"uni-search-hub/internal/config"
 	"uni-search-hub/pkg/common"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
 func GetGinEngine(config config.ServerConfig) *gin.Engine {
 	gin.SetMode(config.Mode)
 	r := gin.New()
+
+	// 添加 session 中间件
+	store := cookie.NewStore([]byte(common.SessionSecret))
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   2592000, // 30 days
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteStrictMode,
+	})
+	r.Use(sessions.Sessions("session", store))
 
 	// 健康检查端点
 	r.GET("/health", func(c *gin.Context) {

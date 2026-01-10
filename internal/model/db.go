@@ -7,6 +7,8 @@ func MigrateDB() error {
 		&Token{},
 		&User{},
 		&Option{},
+		&TwoFA{},
+		&TwoFABackupCode{},
 	)
 	if err != nil {
 		return err

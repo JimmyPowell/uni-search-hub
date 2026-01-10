@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"uni-search-hub/pkg/common"
+	"uni-search-hub/pkg/utils"
 
 	"github.com/spf13/viper"
 )
@@ -33,9 +34,8 @@ type MySQLConfig struct {
 
 // RedisConfig 存储 Redis 的配置。
 type RedisConfig struct {
-	Addr          string `mapstructure:"addr"`
-	Password      string `mapstructure:"password"`
-	SyncFrequency string `mapstructure:"sync_frequency"`
+	Addr     string `mapstructure:"addr"`
+	Password string `mapstructure:"password"`
 }
 
 // LoadConfig 加载配置，从指定路径读取 YAML 配置文件并解析到 fx 框架中
@@ -60,9 +60,14 @@ func LoadConfig() *Config {
 		panic(fmt.Errorf("无法将配置解析到结构体中: %w", err))
 	}
 
+	initEnv(config)
+
 	return config
 }
 
 func initEnv(config *Config) {
 	common.DebugEnabled = config.Server.Mode == "debug"
+
+	common.SyncFrequency = utils.GetEnvOrDefault("SYNC_FREQUENCY", 60)
+	common.GenerateDefaultToken = utils.GetEnvOrDefaultBool("GENERATE_DEFAULT_TOKEN", false)
 }

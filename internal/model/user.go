@@ -123,6 +123,30 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 	return string(configBytes)
 }
 
+// CheckUserExistOrDeleted check if user exist or deleted, if not exist, return false, nil, if deleted or exist, return true, nil
+func CheckUserExistOrDeleted(username string, email string) (bool, error) {
+	var user User
+
+	// err := DB.Unscoped().First(&user, "username = ? or email = ?", username, email).Error
+	// check email if empty
+	var err error
+	if email == "" {
+		err = database.DB.Unscoped().First(&user, "username = ?", username).Error
+	} else {
+		err = database.DB.Unscoped().First(&user, "username = ? or email = ?", username, email).Error
+	}
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// not exist, return false, nil
+			return false, nil
+		}
+		// other error, return false, err
+		return false, err
+	}
+	// exist, return true, nil
+	return true, nil
+}
+
 func GetAllUsers(pageInfo *PageInfo) (users []*User, total int64, err error) {
 	// Start transaction
 	tx := database.DB.Begin()
@@ -315,6 +339,10 @@ func (user *User) Insert(inviterId int) error {
 
 	// TODO RecordLog
 	return nil
+}
+
+func (user *User) SetAccessToken(token string) {
+	user.AccessToken = &token
 }
 
 func (user *User) SetSetting(setting dto.UserSetting) {
