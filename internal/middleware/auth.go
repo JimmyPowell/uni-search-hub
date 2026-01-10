@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"uni-search-hub/internal/model"
 	"uni-search-hub/pkg/common"
+	"uni-search-hub/pkg/utils"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -153,5 +155,61 @@ func AdminAuth() func(c *gin.Context) {
 func RootAuth() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		authHelper(c, common.RoleRootUser)
+	}
+}
+
+func TokenAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		// 目前兼容两种 Key 的位置
+		key := c.Request.Header.Get("Authorization")
+		if key == "" {
+			key = c.Request.Header.Get("X-Subscription-Token")
+		}
+		if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
+			key = strings.TrimSpace(key[7:])
+		}
+
+		token, err := model.ValidateUserToken(key)
+		if token != nil {
+			id := c.GetInt("id")
+			if id == 0 {
+				c.Set("id", token.UserId)
+			}
+		}
+		if err != nil {
+			abortWithMessage(c, http.StatusUnauthorized, err.Error())
+			return
+		}
+
+		allowIps := token.GetIpLimits()
+		if len(allowIps) > 0 {
+			clientIp := c.ClientIP()
+			ip := net.ParseIP(clientIp)
+			if ip == nil {
+				abortWithMessage(c, http.StatusForbidden, "无法解析客户端 IP 地址")
+				return
+			}
+			if utils.IsIpInCIDRList(ip, allowIps) == false {
+				abortWithMessage(c, http.StatusForbidden, "您的 IP 不在令牌允许访问的列表中")
+				return
+			}
+		}
+
+		userCache, err := model.GetUserCache(token.UserId)
+		if err != nil {
+			abortWithMessage(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		userEnabled := userCache.Status == common.UserStatusEnabled
+		if !userEnabled {
+			abortWithMessage(c, http.StatusForbidden, "用户已被封禁")
+			return
+		}
+
+		userCache.WriteContext(c)
+
+		// TODO 组认证
+
+		c.Next()
 	}
 }

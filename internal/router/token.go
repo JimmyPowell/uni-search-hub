@@ -2,12 +2,14 @@ package router
 
 import (
 	"uni-search-hub/internal/handler"
+	"uni-search-hub/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetTokenRouter(router *gin.RouterGroup) {
 	tokenRouter := router.Group("/token")
+	tokenRouter.Use(middleware.UserAuth())
 	{
 		tokenRouter.GET("/", handler.GetAllTokens)
 		tokenRouter.GET("/search", handler.SearchTokens)
@@ -18,9 +20,10 @@ func SetTokenRouter(router *gin.RouterGroup) {
 		tokenRouter.POST("/batch", handler.DeleteTokenBatch)
 	}
 
-	usageRoute := router.Group("api/usage")
+	usageRoute := router.Group("/usage")
 	{
 		tokenUsageRoute := usageRoute.Group("/token")
+		tokenUsageRoute.Use(middleware.TokenAuth())
 		{
 			tokenUsageRoute.GET("/", handler.GetTokenUsage)
 		}

@@ -179,7 +179,7 @@ func AddToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "",
+		"message": "令牌生成成功",
 	})
 	return
 }
@@ -194,7 +194,7 @@ func DeleteToken(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "",
+		"message": "令牌删除成功",
 	})
 	return
 }

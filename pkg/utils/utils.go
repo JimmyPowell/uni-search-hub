@@ -3,6 +3,7 @@ package utils
 import (
 	crand "crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"time"
@@ -45,4 +46,8 @@ func GenerateRandomKey(length int) (string, error) {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(bytes), nil
+}
+
+func MessageWithRequestId(message string, id string) string {
+	return fmt.Sprintf("%s (request id: %s)", message, id)
 }
