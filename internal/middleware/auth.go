@@ -67,33 +67,27 @@ func authHelper(c *gin.Context, minRole int) {
 			return
 		}
 	}
-	// get header Uni-Search-Hub-User
+	// Uni-Search-Hub-User is optional. When provided, it must match the authenticated user.
+	// This keeps proxy/on-behalf-of flows possible without breaking normal browser session usage.
 	apiUserIdStr := c.Request.Header.Get("Uni-Search-Hub-User")
-	if apiUserIdStr == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "无权进行此操作，未提供 Uni-Search-Hub-User",
-		})
-		c.Abort()
-		return
-	}
-	apiUserId, err := strconv.Atoi(apiUserIdStr)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "无权进行此操作，Uni-Search-Hub-User 格式错误",
-		})
-		c.Abort()
-		return
-
-	}
-	if id != apiUserId {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "无权进行此操作，Uni-Search-Hub-User 与登录用户不匹配",
-		})
-		c.Abort()
-		return
+	if apiUserIdStr != "" {
+		apiUserId, err := strconv.Atoi(apiUserIdStr)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "无权进行此操作，Uni-Search-Hub-User 格式错误",
+			})
+			c.Abort()
+			return
+		}
+		if id != apiUserId {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "无权进行此操作，Uni-Search-Hub-User 与登录用户不匹配",
+			})
+			c.Abort()
+			return
+		}
 	}
 	if status.(int) == common.UserStatusDisabled {
 		c.JSON(http.StatusOK, gin.H{
