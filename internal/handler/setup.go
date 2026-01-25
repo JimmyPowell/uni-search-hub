@@ -3,7 +3,6 @@ package handler
 import (
 	"uni-search-hub/internal/model"
 	"uni-search-hub/pkg/common"
-	"uni-search-hub/pkg/crypto"
 	"uni-search-hub/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -59,32 +58,26 @@ func SetUpRootUser(c *gin.Context) {
 			return
 		}
 
-		// Create root user
-		hashedPassword, err := crypto.Password2Hash(req.Password)
-		if err != nil {
-			c.JSON(200, gin.H{
-				"success": false,
-				"message": "系统错误: " + err.Error(),
-			})
-			return
-		}
+		// Create root user.
+		// Use model.User.Insert to ensure default fields (especially aff_code) are filled,
+		// otherwise MySQL unique index on aff_code may conflict on empty string.
 		rootUser := model.User{
 			Username:    req.Username,
-			Password:    hashedPassword,
+			Password:    req.Password, // Insert() will hash it
 			Role:        common.RoleRootUser,
 			Status:      common.UserStatusEnabled,
 			DisplayName: "Root User",
-			AccessToken: nil,
-			Quota:       100000000,
 		}
-		err = database.DB.Create(&rootUser).Error
-		if err != nil {
+		if err := rootUser.Insert(0); err != nil {
 			c.JSON(200, gin.H{
 				"success": false,
 				"message": "创建管理员账号失败: " + err.Error(),
 			})
 			return
 		}
+		// Override default quota for root.
+		rootUser.Quota = 100000000
+		_ = database.DB.Model(&rootUser).Update("quota", rootUser.Quota).Error
 		c.JSON(200, gin.H{
 			"success": true,
 			"message": "创建管理员账号成功",
