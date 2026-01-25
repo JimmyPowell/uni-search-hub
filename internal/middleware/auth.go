@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
@@ -155,15 +156,17 @@ func RootAuth() func(c *gin.Context) {
 func TokenAuth() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// 目前兼容两种 Key 的位置
-		key := c.Request.Header.Get("Authorization")
-		if key == "" {
-			key = c.Request.Header.Get("X-Subscription-Token")
-		}
-		if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
-			key = strings.TrimSpace(key[7:])
-		}
+		key, source := normalizeTokenKey(
+			c.Request.Header.Get("Authorization"),
+			c.Request.Header.Get("X-Subscription-Token"),
+		)
 
 		token, err := model.ValidateUserToken(key)
+		if common.DebugEnabled {
+			// Do not log full token. Only log minimal masked info for debugging.
+			masked := maskTokenKey(key)
+			utils.SysLog(fmt.Sprintf("[TokenAuth] path=%s source=%s token=%s err=%v", c.Request.URL.Path, source, masked, err))
+		}
 		if token != nil {
 			id := c.GetInt("id")
 			if id == 0 {
@@ -209,4 +212,33 @@ func TokenAuth() func(c *gin.Context) {
 
 		c.Next()
 	}
+}
+
+func normalizeTokenKey(authHeader string, xSubToken string) (key string, source string) {
+	key = strings.TrimSpace(authHeader)
+	source = "authorization"
+	if key == "" {
+		key = strings.TrimSpace(xSubToken)
+		source = "x-subscription-token"
+	}
+	if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
+		key = strings.TrimSpace(key[7:])
+	}
+	// Compatibility: allow "sk-" prefix if it looks like a prefixed 48-char key.
+	// Avoid stripping when the actual key itself happens to start with "sk-".
+	if strings.HasPrefix(key, "sk-") && len(key) == 51 {
+		key = key[3:]
+	}
+	return key, source
+}
+
+func maskTokenKey(key string) string {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return "<empty>"
+	}
+	if len(key) <= 6 {
+		return "***"
+	}
+	return key[:3] + "***" + key[len(key)-3:]
 }
