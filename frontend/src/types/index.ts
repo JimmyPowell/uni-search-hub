@@ -35,6 +35,7 @@ export interface Token {
   unlimited_quota: boolean
   remain_quota: number
   used_quota: number
+  group?: string
   created_at: string
   updated_at: string
 }
@@ -45,6 +46,7 @@ export interface TokenForm {
   expired_at?: string
   unlimited_quota: boolean
   remain_quota: number
+  group?: string
 }
 
 // Option配置类型
@@ -83,3 +85,43 @@ export const UserRole = {
 } as const
 
 export type UserRoleType = typeof UserRole[keyof typeof UserRole]
+
+export interface Channel {
+  id: number
+  name: string
+  provider: string
+  api_key?: string
+  enabled: boolean
+  weight: number
+  fail_count?: number
+  last_used_at?: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface RequestLog {
+  id: number
+  request_id: string
+  user_id: number
+  token_id: number
+  channel_id: number
+  provider: string
+  endpoint: string
+  status_code: number
+  latency_ms: number
+  cost: number
+  error?: string
+  created_at: string
+}
+
+export interface TokenUsage {
+  object: 'token_usage'
+  name: string
+  total_granted: number
+  total_used: number
+  total_available: number
+  unlimited_quota: boolean
+  model_limits: Record<string, boolean>
+  model_limits_enabled: boolean
+  expires_at: number
+}

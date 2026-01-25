@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type NavigationGuardNext, type RouteLocationNormalized, type RouteRecordNormalized } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
 const router = createRouter({
@@ -48,18 +48,29 @@ const router = createRouter({
           component: () => import('../pages/Settings.vue'),
           meta: { requiresRoot: true },
         },
+        {
+          path: 'channels',
+          name: 'Channels',
+          component: () => import('../pages/ChannelManage.vue'),
+          meta: { requiresRoot: true },
+        },
+        {
+          path: 'logs',
+          name: 'Logs',
+          component: () => import('../pages/AuditLogs.vue'),
+        },
       ],
     },
   ],
 })
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const userStore = useUserStore()
 
   // 检查路由是否需要认证（包括父路由）
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
-  const requiresRoot = to.matched.some(record => record.meta.requiresRoot)
+  const requiresAuth = to.matched.some((record: RouteRecordNormalized) => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some((record: RouteRecordNormalized) => record.meta.requiresAdmin)
+  const requiresRoot = to.matched.some((record: RouteRecordNormalized) => record.meta.requiresRoot)
   const isGuestPage = to.meta.guest
 
   // 如果未登录且不是游客页面，尝试获取用户信息

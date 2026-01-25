@@ -2,7 +2,7 @@
 import { h, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { NLayout, NLayoutSider, NLayoutContent, NMenu, NIcon, NButton, NAvatar, NDropdown, NSpace, NFlex } from 'naive-ui'
-import { HomeOutline, KeyOutline, PersonOutline, PeopleOutline, SettingsOutline, LogOutOutline } from '@vicons/ionicons5'
+import { HomeOutline, KeyOutline, PersonOutline, PeopleOutline, SettingsOutline, DocumentTextOutline, ServerOutline } from '@vicons/ionicons5'
 import type { MenuOption } from 'naive-ui'
 import { useUserStore } from '../stores/user'
 
@@ -30,6 +30,11 @@ const menuOptions = computed<MenuOption[]>(() => {
       key: 'profile',
       icon: renderIcon(PersonOutline),
     },
+    {
+      label: '请求日志',
+      key: 'logs',
+      icon: renderIcon(DocumentTextOutline),
+    },
   ]
 
   if (userStore.isAdmin) {
@@ -41,6 +46,11 @@ const menuOptions = computed<MenuOption[]>(() => {
   }
 
   if (userStore.isRoot) {
+    options.push({
+      label: '渠道管理',
+      key: 'channels',
+      icon: renderIcon(ServerOutline),
+    })
     options.push({
       label: '系统设置',
       key: 'settings',
