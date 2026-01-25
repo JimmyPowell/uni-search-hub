@@ -210,3 +210,4 @@ frontend/pnpm-lock.yaml
 # Environment files
 deploy/.env
 configs/.env
+configs/config.local.yaml

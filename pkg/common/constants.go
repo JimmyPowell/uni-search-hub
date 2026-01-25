@@ -16,8 +16,9 @@ var DebugEnabled bool
 
 var ItemsPerPage = 10
 
-var CommonGroupCol = `"group"`
-var CommonKeyCol = `"key"`
+// MySQL column quoting. Using double-quotes requires ANSI_QUOTES; backticks work by default.
+var CommonGroupCol = "`group`"
+var CommonKeyCol = "`key`"
 
 var QuotaForNewUser = 0
 var QuotaForInviter = 0
