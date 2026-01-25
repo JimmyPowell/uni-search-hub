@@ -6,6 +6,7 @@ export interface RequestLogQuery {
   page_size?: number
 
   provider?: string
+  action?: string
   endpoint?: string
   status_code?: number
   user_id?: number
@@ -21,4 +22,3 @@ export interface RequestLogQuery {
 export function getRequestLogs(params: RequestLogQuery) {
   return request.get<ApiResponse<PageInfo<RequestLog>>>('/request_log/', { params })
 }
-

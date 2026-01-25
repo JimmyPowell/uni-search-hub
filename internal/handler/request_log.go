@@ -24,6 +24,7 @@ func GetRequestLogs(c *gin.Context) {
 	// 过滤条件（query params）
 	f := model.RequestLogFilter{
 		Provider:   c.Query("provider"),
+		Action:     c.Query("action"),
 		Endpoint:   c.Query("endpoint"),
 		RequestID:  c.Query("request_id"),
 		StatusCode: parseInt(c.Query("status_code")),

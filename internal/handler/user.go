@@ -286,8 +286,10 @@ func GetAllUsers(c *gin.Context) {
 func SearchUsers(c *gin.Context) {
 	keyword := c.Query("keyword")
 	group := c.Query("group")
+	status := parseInt(c.Query("status"))
+	id := parseInt(c.Query("id"))
 	pageInfo := model.GetPageQuery(c)
-	users, total, err := model.SearchUsers(keyword, group, pageInfo.GetStartIdx(), pageInfo.GetPageSize())
+	users, total, err := model.SearchUsers(keyword, group, status, id, pageInfo.GetStartIdx(), pageInfo.GetPageSize())
 	if err != nil {
 		server.ApiError(c, err)
 		return

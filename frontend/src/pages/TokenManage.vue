@@ -235,7 +235,7 @@ onMounted(fetchTokens)
 
 <template>
   <div>
-    <NCard title="Token管理">
+    <NCard title="令牌管理">
       <template #header-extra>
         <NSpace>
           <NPopconfirm @positive-click="handleBatchDelete">
@@ -245,11 +245,11 @@ onMounted(fetchTokens)
                 批量删除
               </NButton>
             </template>
-            确定删除选中的 {{ selectedRowKeys.length }} 个Token?
+            确定删除选中的 {{ selectedRowKeys.length }} 个令牌?
           </NPopconfirm>
           <NButton type="primary" @click="handleAdd">
             <template #icon><NIcon><AddOutline /></NIcon></template>
-            添加Token
+            添加令牌
           </NButton>
         </NSpace>
       </template>

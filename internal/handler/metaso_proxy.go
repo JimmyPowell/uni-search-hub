@@ -54,6 +54,7 @@ func MetaSoSearchProxy(c *gin.Context) {
 		TokenId:    tokenId,
 		ChannelId:  ch.Id,
 		Provider:   providerName,
+		Action:     model.RequestActionProxyRequest,
 		Endpoint:   "/api/metaso/search",
 		StatusCode: status,
 		LatencyMs:  latencyMs,

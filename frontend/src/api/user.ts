@@ -44,8 +44,8 @@ export function getAllUsers() {
 }
 
 // 搜索用户
-export function searchUsers(keyword: string) {
-  return request.get<ApiResponse<PageInfo<User>>>('/user/search', { params: { keyword } })
+export function searchUsers(params: { p?: number; page_size?: number; keyword?: string; id?: number; status?: number }) {
+  return request.get<ApiResponse<PageInfo<User>>>('/user/search', { params })
 }
 
 // 获取指定用户

@@ -54,6 +54,7 @@ func ZhipuWebSearchProxy(c *gin.Context) {
 		TokenId:    tokenId,
 		ChannelId:  ch.Id,
 		Provider:   providerName,
+		Action:     model.RequestActionProxyRequest,
 		Endpoint:   "/api/zhipu_web_search/search",
 		StatusCode: status,
 		LatencyMs:  latencyMs,

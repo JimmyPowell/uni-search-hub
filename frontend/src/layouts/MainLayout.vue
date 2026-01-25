@@ -21,7 +21,7 @@ const menuOptions = computed<MenuOption[]>(() => {
       icon: renderIcon(HomeOutline),
     },
     {
-      label: 'Token管理',
+      label: '令牌管理',
       key: 'tokens',
       icon: renderIcon(KeyOutline),
     },

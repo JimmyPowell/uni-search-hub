@@ -18,9 +18,9 @@ import {
   NIcon,
   NPagination,
 } from 'naive-ui'
-import { AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
+import { AddOutline, CreateOutline, TrashOutline, PlayOutline } from '@vicons/ionicons5'
 import type { DataTableColumns, FormInst, SelectOption } from 'naive-ui'
-import { createChannel, deleteChannel, getChannels, updateChannel } from '../api/channel'
+import { createChannel, deleteChannel, getChannels, updateChannel, testChannel } from '../api/channel'
 import type { Channel } from '../types'
 
 const message = useMessage()
@@ -35,6 +35,7 @@ const showModal = ref(false)
 const modalTitle = ref('添加渠道')
 const formRef = ref<FormInst | null>(null)
 const formLoading = ref(false)
+const testingId = ref<number | null>(null)
 
 type ChannelForm = {
   id?: number
@@ -84,9 +85,21 @@ const columns: DataTableColumns<Channel> = [
   {
     title: '操作',
     key: 'actions',
-    width: 140,
+    width: 200,
     render(row: Channel) {
       return h(NSpace, null, () => [
+        h(
+          NButton,
+          {
+            size: 'small',
+            loading: testingId.value === row.id,
+            onClick: () => handleTest(row.id),
+          },
+          {
+            icon: () => h(NIcon, null, () => h(PlayOutline)),
+            default: () => '测试',
+          }
+        ),
         h(
           NButton,
           { size: 'small', onClick: () => handleEdit(row) },
@@ -109,6 +122,24 @@ const columns: DataTableColumns<Channel> = [
     },
   },
 ]
+
+async function handleTest(id: number) {
+  if (testingId.value) return
+  testingId.value = id
+  try {
+    const res = await testChannel(id)
+    if (res.data.success) {
+      const d: any = res.data.data || {}
+      message.success(`测试成功（${d.provider || ''} ${d.latency_ms ?? ''}ms）`)
+    } else {
+      message.error(res.data.message || '测试失败')
+    }
+  } catch (error: any) {
+    message.error(error.response?.data?.message || '测试失败')
+  } finally {
+    testingId.value = null
+  }
+}
 
 async function fetchChannels() {
   loading.value = true
@@ -304,4 +335,3 @@ onMounted(fetchChannels)
     </NModal>
   </div>
 </template>
-

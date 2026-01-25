@@ -14,7 +14,7 @@ func SetChannelRouter(router *gin.RouterGroup) {
 		channelRouter.GET("/", handler.GetChannels)
 		channelRouter.POST("/", handler.CreateChannel)
 		channelRouter.PUT("/", handler.UpdateChannel)
+		channelRouter.POST("/:id/test", handler.TestChannel)
 		channelRouter.DELETE("/:id", handler.DeleteChannel)
 	}
 }
-

@@ -17,3 +17,6 @@ export function deleteChannel(id: number) {
   return request.delete<ApiResponse>(`/channel/${id}`)
 }
 
+export function testChannel(id: number, params?: { q?: string }) {
+  return request.post<ApiResponse>(`/channel/${id}/test`, null, { params })
+}

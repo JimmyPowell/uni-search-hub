@@ -11,6 +11,7 @@ type RequestLogFilter struct {
 	TokenID    int
 	ChannelID  int
 	Provider   string
+	Action     string
 	Endpoint   string
 	RequestID  string
 	StatusCode int
@@ -35,6 +36,9 @@ func GetRequestLogs(pageInfo *PageInfo, f *RequestLogFilter) (logs []*RequestLog
 		}
 		if f.Provider != "" {
 			tx = tx.Where("provider = ?", f.Provider)
+		}
+		if f.Action != "" {
+			tx = tx.Where("action = ?", f.Action)
 		}
 		if f.Endpoint != "" {
 			tx = tx.Where("endpoint = ?", f.Endpoint)

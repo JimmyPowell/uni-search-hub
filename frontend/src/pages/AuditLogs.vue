@@ -11,6 +11,7 @@ import {
   useMessage,
   NTag,
   NPagination,
+  NSelect,
 } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
 import { getRequestLogs } from '../api/request_log'
@@ -19,6 +20,14 @@ import { useUserStore } from '../stores/user'
 
 const message = useMessage()
 const userStore = useUserStore()
+
+function formatDateTimeSeconds(value: string) {
+  if (!value) return ''
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return value
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
 
 const loading = ref(false)
 const logs = ref<RequestLog[]>([])
@@ -33,14 +42,45 @@ const statusCode = ref<number | null>(null)
 const tokenId = ref<number | null>(null)
 const channelId = ref<number | null>(null)
 const userId = ref<number | null>(null)
+const action = ref('')
 
 // Unix ms range
 const timeRange = ref<[number, number] | null>(null)
 
 const isAdmin = computed(() => userStore.isAdmin)
 
+const actionOptions = [
+  { label: '全部', value: '' },
+  { label: '请求', value: 'proxy_request' },
+  { label: '测试', value: 'channel_test' },
+  { label: '充值', value: 'token_charge' },
+]
+
 const columns: DataTableColumns<RequestLog> = [
-  { title: '时间', key: 'created_at', width: 180 },
+  {
+    title: '时间',
+    key: 'created_at',
+    width: 170,
+    render(row: RequestLog) {
+      const text = formatDateTimeSeconds(row.created_at)
+      return h('span', { title: row.created_at }, text)
+    },
+  },
+  {
+    title: '类型',
+    key: 'action',
+    width: 90,
+    render(row: RequestLog) {
+      const map: Record<string, { type: 'success' | 'warning' | 'info' | 'error'; text: string }> = {
+        proxy_request: { type: 'success', text: '请求' },
+        channel_test: { type: 'info', text: '测试' },
+        token_charge: { type: 'warning', text: '充值' },
+      }
+      const v = row.action || 'proxy_request'
+      const t = map[v] || { type: 'info', text: v }
+      return h(NTag, { type: t.type as any, size: 'small' }, () => t.text)
+    },
+  },
   { title: 'Provider', key: 'provider', width: 140 },
   { title: 'Endpoint', key: 'endpoint', width: 180 },
   {
@@ -78,6 +118,7 @@ async function fetchLogs() {
       p: page.value,
       page_size: pageSize.value,
       provider: provider.value || undefined,
+      action: action.value || undefined,
       endpoint: endpoint.value || undefined,
       request_id: requestId.value || undefined,
       status_code: statusCode.value ?? undefined,
@@ -107,6 +148,7 @@ function handleSearch() {
 
 function handleReset() {
   provider.value = ''
+  action.value = ''
   endpoint.value = ''
   requestId.value = ''
   statusCode.value = null
@@ -137,6 +179,7 @@ onMounted(fetchLogs)
       <NSpace vertical :size="12" style="margin-bottom: 12px">
         <NSpace wrap>
           <NInput v-model:value="provider" placeholder="provider" style="width: 180px" />
+          <NSelect v-model:value="action" :options="actionOptions" placeholder="type" style="width: 160px" />
           <NInput v-model:value="endpoint" placeholder="endpoint" style="width: 220px" />
           <NInput v-model:value="requestId" placeholder="request_id" style="width: 220px" />
           <NInputNumber v-model:value="statusCode" placeholder="status_code" :min="100" :max="599" style="width: 140px" />
@@ -153,6 +196,8 @@ onMounted(fetchLogs)
             v-model:value="timeRange"
             type="datetimerange"
             clearable
+            format="yyyy-MM-dd HH:mm:ss"
+            :time-picker-props="{ format: 'HH:mm:ss' }"
             style="width: 320px"
           />
         </NSpace>
@@ -184,4 +229,3 @@ onMounted(fetchLogs)
     </NCard>
   </div>
 </template>
-

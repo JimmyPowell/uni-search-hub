@@ -58,6 +58,7 @@ func TavilySearchProxy(c *gin.Context) {
 		TokenId:    tokenId,
 		ChannelId:  ch.Id,
 		Provider:   providerName,
+		Action:     model.RequestActionProxyRequest,
 		Endpoint:   "/api/tavily/search",
 		StatusCode: status,
 		LatencyMs:  latencyMs,

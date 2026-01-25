@@ -106,6 +106,8 @@ export interface RequestLog {
   token_id: number
   channel_id: number
   provider: string
+  action: string
+  meta?: string
   endpoint: string
   status_code: number
   latency_ms: number

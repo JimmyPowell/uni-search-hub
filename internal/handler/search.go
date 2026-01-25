@@ -6,8 +6,8 @@ import (
 	"uni-search-hub/internal/dto"
 	"uni-search-hub/internal/model"
 	"uni-search-hub/internal/provider"
-	"uni-search-hub/internal/service"
 	"uni-search-hub/internal/server"
+	"uni-search-hub/internal/service"
 	"uni-search-hub/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -68,6 +68,7 @@ func UnifiedSearch(c *gin.Context) {
 		TokenId:    tokenIdInt,
 		ChannelId:  ch.Id,
 		Provider:   providerName,
+		Action:     model.RequestActionProxyRequest,
 		Endpoint:   "/api/search",
 		StatusCode: 200,
 		LatencyMs:  latencyMs,

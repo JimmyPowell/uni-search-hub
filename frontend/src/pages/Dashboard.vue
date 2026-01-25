@@ -64,7 +64,7 @@ onMounted(async () => {
         <NCard title="快速开始">
           <p>UniSearch Hub 是一个统一搜索API聚合服务，支持多种搜索引擎（Tavily、Brave、Jina等）。</p>
           <ul>
-            <li>在 <strong>Token管理</strong> 中创建API Token来访问搜索服务</li>
+            <li>在 <strong>令牌管理</strong> 中创建 API Token 来访问搜索服务</li>
             <li>在 <strong>个人资料</strong> 中修改您的账户信息</li>
           </ul>
         </NCard>
