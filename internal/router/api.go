@@ -9,6 +9,7 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter := router.Group("/api")
 	apiRouter.Use(gzip.Gzip(gzip.DefaultCompression))
 	{
+		SetSetupRouter(apiRouter)
 		SetUserRouter(apiRouter)
 		SetTokenRouter(apiRouter)
 		SetOptionRouter(apiRouter)

@@ -1,9 +1,39 @@
 import { createRouter, createWebHistory, type NavigationGuardNext, type RouteLocationNormalized, type RouteRecordNormalized } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { getSetupStatus, type SetupStatus } from '../api/setup'
+
+let setupStatusCache: SetupStatus | null = null
+let setupStatusPromise: Promise<SetupStatus | null> | null = null
+
+async function ensureSetupStatus(): Promise<SetupStatus | null> {
+  if (setupStatusCache) return setupStatusCache
+  if (setupStatusPromise) return setupStatusPromise
+  setupStatusPromise = (async () => {
+    try {
+      const res = await getSetupStatus()
+      if (res.data.success && res.data.data) {
+        setupStatusCache = res.data.data
+        return setupStatusCache
+      }
+    } catch {
+      // ignore
+    } finally {
+      setupStatusPromise = null
+    }
+    return null
+  })()
+  return setupStatusPromise
+}
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    {
+      path: '/setup',
+      name: 'Setup',
+      component: () => import('../pages/Setup.vue'),
+      meta: { guest: true },
+    },
     {
       path: '/login',
       name: 'Login',
@@ -71,6 +101,14 @@ const router = createRouter({
 
 router.beforeEach(async (to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const userStore = useUserStore()
+
+  // Root 初始化引导：未初始化时强制跳转到 /setup。
+  const setupStatus = await ensureSetupStatus()
+  if (setupStatus?.setupRequired) {
+    if (to.path !== '/setup') return next('/setup')
+  } else if (to.path === '/setup') {
+    return next(userStore.isLoggedIn ? '/' : '/login')
+  }
 
   // 检查路由是否需要认证（包括父路由）
   const requiresAuth = to.matched.some((record: RouteRecordNormalized) => record.meta.requiresAuth)

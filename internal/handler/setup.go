@@ -96,3 +96,9 @@ func SetUpRootUser(c *gin.Context) {
 		"message": "管理员帐号已经存在",
 	})
 }
+
+// SetupRootUser 用于前端初始化流程的 Root 创建接口（POST /api/setup/root）。
+// 保留 SetUpRootUser 兼容历史接口（GET /api/user/root）。
+func SetupRootUser(c *gin.Context) {
+	SetUpRootUser(c)
+}
