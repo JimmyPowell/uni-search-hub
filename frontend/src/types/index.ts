@@ -125,3 +125,24 @@ export interface TokenUsage {
   model_limits_enabled: boolean
   expires_at: number
 }
+
+export interface ServiceEndpoint {
+  method: string
+  path: string
+  auth: 'token' | 'session'
+  notes?: string
+  example_headers?: Record<string, string>
+  example_body?: any
+}
+
+export interface ServiceItem {
+  id: string
+  name: string
+  provider: string
+  enabled_channels_count: number
+  endpoints: ServiceEndpoint[]
+}
+
+export interface ServiceCatalog {
+  services: ServiceItem[]
+}

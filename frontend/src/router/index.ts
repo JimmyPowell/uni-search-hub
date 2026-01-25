@@ -59,6 +59,11 @@ const router = createRouter({
           name: 'Logs',
           component: () => import('../pages/AuditLogs.vue'),
         },
+        {
+          path: 'services',
+          name: 'Services',
+          component: () => import('../pages/Services.vue'),
+        },
       ],
     },
   ],

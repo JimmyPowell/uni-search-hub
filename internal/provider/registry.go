@@ -34,3 +34,13 @@ func GetProvider(name string) (SearchProvider, bool) {
 	return p, ok
 }
 
+// ListProviders 返回已注册 provider 的名称列表（用于 meta 展示）。
+func ListProviders() []string {
+	registryMu.RLock()
+	defer registryMu.RUnlock()
+	out := make([]string, 0, len(registry))
+	for name := range registry {
+		out = append(out, name)
+	}
+	return out
+}

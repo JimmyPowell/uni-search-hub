@@ -2,7 +2,7 @@
 import { h, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { NLayout, NLayoutSider, NLayoutContent, NMenu, NIcon, NButton, NAvatar, NDropdown, NSpace, NFlex } from 'naive-ui'
-import { HomeOutline, KeyOutline, PersonOutline, PeopleOutline, SettingsOutline, DocumentTextOutline, ServerOutline } from '@vicons/ionicons5'
+import { HomeOutline, KeyOutline, PersonOutline, PeopleOutline, SettingsOutline, DocumentTextOutline, ServerOutline, ListOutline } from '@vicons/ionicons5'
 import type { MenuOption } from 'naive-ui'
 import { useUserStore } from '../stores/user'
 
@@ -34,6 +34,11 @@ const menuOptions = computed<MenuOption[]>(() => {
       label: '请求日志',
       key: 'logs',
       icon: renderIcon(DocumentTextOutline),
+    },
+    {
+      label: '服务目录',
+      key: 'services',
+      icon: renderIcon(ListOutline),
     },
   ]
 
