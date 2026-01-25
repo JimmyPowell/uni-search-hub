@@ -22,6 +22,9 @@ func SetTokenRouter(router *gin.RouterGroup) {
 
 	usageRoute := router.Group("/usage")
 	{
+		// Session 版 Token 用量：管理台场景（不需要暴露 token key）。
+		usageRoute.GET("/token/:id", middleware.UserAuth(), handler.GetTokenUsageById)
+
 		tokenUsageRoute := usageRoute.Group("/token")
 		tokenUsageRoute.Use(middleware.TokenAuth())
 		{
