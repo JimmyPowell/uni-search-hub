@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NDivider, NPopconfirm, useMessage } from 'naive-ui'
+import { NCard, NForm, NFormItem, NInput, NButton, NPopconfirm, useMessage } from 'naive-ui'
 import type { FormInst } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
@@ -27,7 +27,14 @@ const passwordForm = ref({
 
 const rules = {
   email: [
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        if (!value) return true
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        return ok ? true : new Error('请输入有效的邮箱地址')
+      },
+      trigger: 'blur',
+    },
   ],
 }
 

@@ -26,7 +26,13 @@ const rules = {
   },
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        return ok ? true : new Error('请输入有效的邮箱地址')
+      },
+      trigger: 'blur',
+    },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },

@@ -2,7 +2,7 @@
 import { ref, onMounted, h } from 'vue'
 import {
   NCard, NDataTable, NButton, NSpace, NPopconfirm, NModal,
-  NForm, NFormItem, NInput, NSelect, NInputNumber,
+  NForm, NFormItem, NInput, NSelect,
   useMessage, NTag, NIcon
 } from 'naive-ui'
 import { AddOutline, TrashOutline, CreateOutline } from '@vicons/ionicons5'
@@ -21,7 +21,17 @@ const formRef = ref<FormInst | null>(null)
 const formLoading = ref(false)
 const isEdit = ref(false)
 
-const formValue = ref({
+type UserForm = {
+  id: number
+  username: string
+  email: string
+  display_name: string
+  password: string
+  role: number
+  status: number
+}
+
+const formValue = ref<UserForm>({
   id: 0,
   username: '',
   email: '',
@@ -35,7 +45,13 @@ const rules = {
   username: { required: true, message: '请输入用户名', trigger: 'blur' },
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        return ok ? true : new Error('请输入有效的邮箱地址')
+      },
+      trigger: 'blur',
+    },
   ],
   password: {
     required: true,
@@ -58,7 +74,7 @@ const roleOptions = [
 
 const statusOptions = [
   { label: '正常', value: 1 },
-  { label: '禁用', value: 0 },
+  { label: '禁用', value: 2 },
 ]
 
 const columns: DataTableColumns<User> = [
@@ -70,7 +86,7 @@ const columns: DataTableColumns<User> = [
     title: '角色',
     key: 'role',
     width: 100,
-    render(row) {
+    render(row: User) {
       const roleMap: Record<number, { type: 'success' | 'warning' | 'error', text: string }> = {
         [UserRole.User]: { type: 'success', text: '用户' },
         [UserRole.Admin]: { type: 'warning', text: '管理员' },
@@ -84,7 +100,7 @@ const columns: DataTableColumns<User> = [
     title: '状态',
     key: 'status',
     width: 80,
-    render(row) {
+    render(row: User) {
       return h(NTag, { type: row.status === 1 ? 'success' : 'error', size: 'small' },
         () => row.status === 1 ? '正常' : '禁用')
     }
@@ -94,7 +110,7 @@ const columns: DataTableColumns<User> = [
     title: '操作',
     key: 'actions',
     width: 150,
-    render(row) {
+    render(row: User) {
       return h(NSpace, null, () => [
         h(NButton, { size: 'small', onClick: () => handleEdit(row) }, () => [
           h(NIcon, null, () => h(CreateOutline)),

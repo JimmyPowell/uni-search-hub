@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosError, type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiResponse } from '../types'
 
 const request: AxiosInstance = axios.create({
@@ -12,7 +12,7 @@ request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     return config
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error)
   }
 )
@@ -22,7 +22,7 @@ request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     return response
   },
-  (error) => {
+  (error: AxiosError) => {
     if (error.response?.status === 401) {
       // 未授权，清除状态并跳转登录（排除登录相关接口）
       const url = error.config?.url || ''

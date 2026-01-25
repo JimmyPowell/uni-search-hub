@@ -22,7 +22,7 @@ export function getSelf() {
 }
 
 // 更新当前用户信息
-export function updateSelf(data: Partial<User>) {
+export function updateSelf(data: Partial<User> & { password?: string }) {
   return request.put<ApiResponse>('/user/self', data)
 }
 

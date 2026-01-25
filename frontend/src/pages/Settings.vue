@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NSpin, useMessage, NDivider } from 'naive-ui'
+import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NSpin, useMessage } from 'naive-ui'
 import { getOptions, updateOption } from '../api/option'
 import type { Option } from '../types'
 
@@ -31,12 +31,13 @@ async function fetchOptions() {
 async function handleSave(key: string) {
   saving.value = true
   try {
-    const res = await updateOption({ key, value: editedOptions.value[key] })
+    const value = editedOptions.value[key] ?? ''
+    const res = await updateOption({ key, value })
     if (res.data.success) {
       message.success('保存成功')
       const opt = options.value.find(o => o.key === key)
       if (opt) {
-        opt.value = editedOptions.value[key]
+        opt.value = value
       }
     } else {
       message.error(res.data.message || '保存失败')
@@ -80,21 +81,23 @@ onMounted(fetchOptions)
               <NSpace align="center" style="width: 100%">
                 <NInput
                   v-if="getOptionType(option.key) === 'password'"
-                  v-model:value="editedOptions[option.key]"
+                  :value="editedOptions[option.key] ?? ''"
+                  @update:value="(v) => (editedOptions[option.key] = v)"
                   type="password"
                   show-password-on="click"
                   style="width: 400px"
                 />
                 <NInput
                   v-else
-                  v-model:value="editedOptions[option.key]"
+                  :value="editedOptions[option.key] ?? ''"
+                  @update:value="(v) => (editedOptions[option.key] = v)"
                   style="width: 400px"
                 />
                 <NButton
                   type="primary"
                   size="small"
                   :loading="saving"
-                  :disabled="editedOptions[option.key] === option.value"
+                  :disabled="(editedOptions[option.key] ?? '') === option.value"
                   @click="handleSave(option.key)"
                 >
                   保存
