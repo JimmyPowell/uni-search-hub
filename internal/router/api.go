@@ -12,5 +12,10 @@ func SetApiRouter(router *gin.Engine) {
 		SetUserRouter(apiRouter)
 		SetTokenRouter(apiRouter)
 		SetOptionRouter(apiRouter)
+		SetChannelRouter(apiRouter)
+		SetSearchRouter(apiRouter)
+		SetTavilyRouter(apiRouter)
+		SetMetaSoRouter(apiRouter)
+		SetZhipuWebSearchRouter(apiRouter)
 	}
 }

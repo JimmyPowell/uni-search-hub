@@ -175,6 +175,9 @@ func TokenAuth() func(c *gin.Context) {
 			if id == 0 {
 				c.Set("id", token.UserId)
 			}
+			// 供后续审计/扣费使用（避免重复查库）
+			c.Set("token_id", token.Id)
+			c.Set("token", token)
 		}
 		if err != nil {
 			abortWithMessage(c, http.StatusUnauthorized, err.Error())

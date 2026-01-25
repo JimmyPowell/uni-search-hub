@@ -28,3 +28,15 @@ func StringsContains(strs []string, str string) bool {
 	}
 	return false
 }
+
+// TruncateString 截断字符串到指定长度（按 rune 计数，避免切到半个字符）。
+func TruncateString(s string, maxLen int) string {
+	if maxLen <= 0 {
+		return ""
+	}
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	return string(runes[:maxLen])
+}
