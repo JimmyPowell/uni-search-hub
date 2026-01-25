@@ -29,8 +29,11 @@ func UnifiedSearch(c *gin.Context) {
 		return
 	}
 
-	// MVP：默认使用 tavily，后续可扩展为 query param / body 选择 provider。
-	providerName := "tavily"
+	// MVP：默认使用 tavily；可通过 query param 切换，如 /api/search?provider=metaso
+	providerName := c.Query("provider")
+	if providerName == "" {
+		providerName = "tavily"
+	}
 
 	p, ok := provider.GetProvider(providerName)
 	if !ok {
@@ -100,4 +103,3 @@ func UnifiedSearch(c *gin.Context) {
 	}
 	server.ApiSuccess(c, resp)
 }
-
