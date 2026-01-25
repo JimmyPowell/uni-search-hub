@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"time"
@@ -23,6 +25,8 @@ func TavilySearchProxy(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "无法读取请求体"})
 		return
 	}
+	// 兼容部分 SDK：请求体可能携带 api_key（本系统 token）。转发上游前必须剥离，避免泄露。
+	rawBody = stripJSONField(rawBody, "api_key")
 
 	providerName := tavily.ProviderName
 	channels, err := model.GetEnabledChannelsByProvider(providerName)
@@ -89,3 +93,21 @@ func TavilySearchProxy(c *gin.Context) {
 	c.Data(status, respCT, respBody)
 }
 
+func stripJSONField(raw []byte, field string) []byte {
+	if len(raw) == 0 || field == "" {
+		return raw
+	}
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return raw
+	}
+	if _, ok := m[field]; !ok {
+		return raw
+	}
+	delete(m, field)
+	out, err := json.Marshal(m)
+	if err != nil {
+		return raw
+	}
+	return bytes.TrimSpace(out)
+}
