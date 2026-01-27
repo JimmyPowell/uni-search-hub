@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func GetTimestamp() int64 {
@@ -70,4 +73,15 @@ func Interface2String(inter interface{}) string {
 		return ""
 	}
 	return fmt.Sprintf("%v", inter)
+}
+
+func RandomSleep() {
+	// Sleep for 0-3000 ms
+	time.Sleep(time.Duration(rand.Intn(3000)) * time.Millisecond)
+}
+
+func GetUUID() string {
+	code := uuid.New().String()
+	code = strings.Replace(code, "-", "", -1)
+	return code
 }

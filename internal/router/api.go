@@ -20,5 +20,6 @@ func SetApiRouter(router *gin.Engine) {
 		SetZhipuWebSearchRouter(apiRouter)
 		SetRequestLogRouter(apiRouter)
 		SetMetaRouter(apiRouter)
+		SetRedemptionRouter(apiRouter)
 	}
 }

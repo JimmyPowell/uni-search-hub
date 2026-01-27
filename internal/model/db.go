@@ -14,6 +14,7 @@ func MigrateDB() error {
 		&RequestLog{},
 		&TwoFA{},
 		&TwoFABackupCode{},
+		&Redemption{},
 	)
 	if err != nil {
 		return err
