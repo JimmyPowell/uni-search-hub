@@ -34,8 +34,6 @@ func authHelper(c *gin.Context, minRole int) {
 	id := session.Get("id")
 	status := session.Get("status")
 	useAccessToken := false
-	utils.SysLog(fmt.Sprintf("role: %d", role))
-	utils.SysLog(fmt.Sprintf("minRole: %d", minRole))
 	if username == nil {
 		// Check access token
 		accessToken := c.Request.Header.Get("Authorization")

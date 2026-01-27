@@ -6,6 +6,9 @@ export interface User {
   email: string
   role: number // 1: 普通用户, 10: 管理员, 100: Root
   status: number
+  quota: number // 剩余配额
+  used_quota: number // 已使用配额
+  request_count: number // 请求次数
   created_at: string
   updated_at: string
 }
@@ -147,4 +150,27 @@ export interface ServiceItem {
 
 export interface ServiceCatalog {
   services: ServiceItem[]
+}
+
+// 兑换码相关类型
+export interface Redemption {
+  id: number
+  user_id: number
+  key: string
+  status: number // 1: 未使用, 2: 已使用, 3: 已禁用
+  name: string
+  quota: number
+  created_time: number
+  redeemed_time: number
+  used_user_id: number
+  expired_time: number
+}
+
+export interface RedemptionForm {
+  id?: number
+  name: string
+  quota: number
+  count: number
+  expired_time?: number
+  status?: number
 }

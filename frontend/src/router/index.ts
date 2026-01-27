@@ -67,6 +67,12 @@ const router = createRouter({
           component: () => import('../pages/Profile.vue'),
         },
         {
+          path: 'redemptions',
+          name: 'Redemptions',
+          component: () => import('../pages/RedemptionManage.vue'),
+          meta: { requiresAdmin: true },
+        },
+        {
           path: 'users',
           name: 'Users',
           component: () => import('../pages/UserManage.vue'),

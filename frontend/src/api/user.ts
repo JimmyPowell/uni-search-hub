@@ -72,3 +72,8 @@ export function deleteUser(id: number) {
 export function setupRootUser() {
   return request.get<ApiResponse>('/user/root')
 }
+
+// 兑换充值
+export function topUp(key: string) {
+  return request.post<ApiResponse<number>>('/user/topup', { key })
+}

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { NCard, NForm, NFormItem, NInput, NButton, NPopconfirm, useMessage } from 'naive-ui'
+import { NCard, NForm, NFormItem, NInput, NButton, NPopconfirm, NInputNumber, useMessage, NAlert } from 'naive-ui'
 import type { FormInst } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { updateSelf, deleteSelf } from '../api/user'
+import { updateSelf, deleteSelf, topUp } from '../api/user'
 
 const router = useRouter()
 const message = useMessage()
@@ -24,6 +24,12 @@ const passwordForm = ref({
   password: '',
   confirmPassword: '',
 })
+
+const redemptionForm = ref({
+  key: '',
+})
+const redemptionFormRef = ref<FormInst | null>(null)
+const redemptionLoading = ref(false)
 
 const rules = {
   email: [
@@ -132,6 +138,34 @@ async function handleDeleteAccount() {
     message.error(error.response?.data?.message || '删除失败')
   }
 }
+
+async function handleRedemption() {
+  try {
+    await redemptionFormRef.value?.validate()
+  } catch {
+    return
+  }
+
+  redemptionLoading.value = true
+  try {
+    const res = await topUp(redemptionForm.value.key)
+    if (res.data.success) {
+      message.success(`充值成功，获得 ${res.data.data ?? 0} 配额`)
+      redemptionForm.value.key = ''
+      await userStore.fetchUser()
+    } else {
+      message.error(res.data.message || '充值失败')
+    }
+  } catch (error: any) {
+    message.error(error.response?.data?.message || '充值失败')
+  } finally {
+    redemptionLoading.value = false
+  }
+}
+
+const redemptionRules = {
+  key: { required: true, message: '请输入兑换码', trigger: 'blur' },
+}
 </script>
 
 <template>
@@ -163,6 +197,20 @@ async function handleDeleteAccount() {
         </NFormItem>
         <NFormItem>
           <NButton type="primary" :loading="passwordLoading" @click="handleChangePassword">修改密码</NButton>
+        </NFormItem>
+      </NForm>
+    </NCard>
+
+    <NCard title="兑换码充值" style="margin-top: 16px">
+      <NAlert type="info" style="margin-bottom: 16px">
+        如果您有兑换码，请在此输入以获得配额。
+      </NAlert>
+      <NForm ref="redemptionFormRef" :model="redemptionForm" :rules="redemptionRules" label-placement="left" label-width="100">
+        <NFormItem label="兑换码" path="key">
+          <NInput v-model:value="redemptionForm.key" placeholder="请输入兑换码" />
+        </NFormItem>
+        <NFormItem>
+          <NButton type="primary" :loading="redemptionLoading" @click="handleRedemption">兑换</NButton>
         </NFormItem>
       </NForm>
     </NCard>

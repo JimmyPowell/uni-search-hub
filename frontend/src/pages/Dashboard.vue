@@ -12,8 +12,6 @@ const tokens = ref<Token[]>([])
 const stats = ref({
   totalTokens: 0,
   activeTokens: 0,
-  totalQuota: 0,
-  usedQuota: 0,
 })
 
 onMounted(async () => {
@@ -23,8 +21,6 @@ onMounted(async () => {
       tokens.value = res.data.data.items ?? []
       stats.value.totalTokens = tokens.value.length
       stats.value.activeTokens = tokens.value.filter(t => t.status === 1).length
-      stats.value.totalQuota = tokens.value.reduce((sum, t) => sum + (t.unlimited_quota ? 0 : t.remain_quota), 0)
-      stats.value.usedQuota = tokens.value.reduce((sum, t) => sum + t.used_quota, 0)
     }
   } finally {
     loading.value = false
@@ -35,7 +31,7 @@ onMounted(async () => {
 <template>
   <div class="dashboard">
     <h2 style="margin-bottom: 24px">欢迎回来，{{ userStore.displayName }}</h2>
-    
+
     <NSpin :show="loading">
       <NGrid :cols="4" :x-gap="16" :y-gap="16">
         <NGridItem>
@@ -50,12 +46,12 @@ onMounted(async () => {
         </NGridItem>
         <NGridItem>
           <NCard>
-            <NStatistic label="剩余配额" :value="stats.totalQuota" />
+            <NStatistic label="剩余配额" :value="userStore.user?.quota ?? 0" />
           </NCard>
         </NGridItem>
         <NGridItem>
           <NCard>
-            <NStatistic label="已使用配额" :value="stats.usedQuota" />
+            <NStatistic label="已使用配额" :value="userStore.user?.used_quota ?? 0" />
           </NCard>
         </NGridItem>
       </NGrid>
@@ -65,7 +61,7 @@ onMounted(async () => {
           <p>UniSearch Hub 是一个统一搜索API聚合服务，支持多种搜索引擎（Tavily、Brave、Jina等）。</p>
           <ul>
             <li>在 <strong>令牌管理</strong> 中创建 API Token 来访问搜索服务</li>
-            <li>在 <strong>个人资料</strong> 中修改您的账户信息</li>
+            <li>在 <strong>个人资料</strong> 中修改您的账户信息或使用兑换码充值</li>
           </ul>
         </NCard>
       </NSpace>
