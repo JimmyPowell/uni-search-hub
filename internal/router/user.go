@@ -23,6 +23,7 @@ func SetUserRouter(router *gin.RouterGroup) {
 			selfRouter.PUT("/self", handler.UpdateSelf)
 			selfRouter.DELETE("/self", handler.DeleteSelf)
 			selfRouter.GET("/token", handler.GenerateAccessToken)
+			selfRouter.POST("/topup", handler.TopUp)
 		}
 
 		adminRouter := userRouter.Group("/")
